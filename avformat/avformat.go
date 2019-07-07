@@ -599,14 +599,12 @@ func NewContextForInput() (*Context, error) {
 //	return NewContextFromC(cCtx), nil
 //}
 
-func NewContextForOutput2(fmt, fn string) (*Context, error) {
+func NewContextForOutput2(fmt string) (*Context, error) {
 	cFmt := C.CString(fmt)
 	defer C.free(unsafe.Pointer(cFmt))
-	cFn := C.CString(fn)
-	defer C.free(unsafe.Pointer(cFn))
 	//var cCtx *C.AVFormatContext
 	var cCtx uintptr
-	code := C.go_avformat_alloc_output_context2((**C.AVFormatContext)(unsafe.Pointer(&cCtx)), nil, cFmt, cFn)
+	code := C.go_avformat_alloc_output_context2((**C.AVFormatContext)(unsafe.Pointer(&cCtx)), nil, cFmt, nil)
 	if code < 0 {
 		return nil, avutil.NewErrorFromCode(avutil.ErrorCode(code))
 	}
