@@ -290,6 +290,7 @@ const (
 
 const (
 	ProfileUnknown int = C.FF_PROFILE_UNKNOWN
+	ProfileAAC     int = C.FF_PROFILE_AAC_MAIN
 )
 
 type SubtitlesEncodingMode int
