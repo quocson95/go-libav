@@ -2,6 +2,7 @@ package avswresample
 
 // #include "libswresample/swresample.h"
 // #include "libavutil/avutil.h"
+// #define MAX_AUDIO_FRAME_SIZE 192000
 //static void go_av_swresample_free(SwrContext *swrCtx) {
 //	swr_free(&swrCtx);
 //}
