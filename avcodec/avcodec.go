@@ -534,6 +534,10 @@ func (p *Profile) ID() int {
 	return int(p.CAVProfile.profile)
 }
 
+func GetCodecNameByID(codecID CodecID) (string, bool) {
+	return cStringToStringOk(C.avcodec_get_name((C.enum_AVCodecID)(codecID)))
+}
+
 type Codec struct {
 	//CAVCodec *C.AVCodec
 	CAVCodec uintptr
