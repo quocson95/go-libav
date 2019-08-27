@@ -11,6 +11,7 @@ package avutil
 //#include <libavutil/parseutils.h>
 //#include <libavutil/common.h>
 //#include <libavutil/eval.h>
+//#include <libavutil/audio_fifo.h>
 //
 //#ifdef AV_LOG_TRACE
 //#define GO_AV_LOG_TRACE AV_LOG_TRACE
@@ -59,6 +60,9 @@ package avutil
 //}
 //static void go_av_frame_free(AVFrame *frame) {
 //	av_frame_free(&frame);
+//}
+//static void** go_get_void_pointer(unsigned char **ptr) {
+//	return (void**)(ptr);
 //}
 // #cgo pkg-config: libavutil
 import "C"
@@ -1421,4 +1425,41 @@ func boolToCInt(b bool) C.int {
 		return 1
 	}
 	return 0
+}
+
+type AudioFifo struct {
+	CAVAudioFifo uintptr
+}
+
+func (fifo *AudioFifo) Realloc(size int) error {
+	if C.av_audio_fifo_realloc((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)), (C.int)(size)) < 0 {
+		return errors.New("Could not reallocate FIFO\n")
+	}
+	return nil
+}
+
+func (fifo *AudioFifo) Writer(frame *Frame) error {
+	if C.av_audio_fifo_write((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)),
+		C.go_get_void_pointer(frame.Frame().extended_data),
+		(C.int)(frame.NumberOfSamples())) < (C.int)(frame.NumberOfSamples()) {
+		return errors.New("Could not write data to FIFO\n")
+	}
+	return nil
+}
+
+func (fifo *AudioFifo) Size() int {
+	return (int)(C.av_audio_fifo_size((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo))))
+}
+
+func (fifo *AudioFifo) Read(frame *Frame) error {
+	if C.av_audio_fifo_read((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)),
+		C.go_get_void_pointer(frame.Frame().extended_data),
+		(C.int)(frame.NumberOfSamples())) < (C.int)(frame.NumberOfSamples()) {
+		return errors.New("Could not read data from FIFO\n")
+	}
+	return nil
+}
+
+func (fifo *AudioFifo) Free() {
+	C.av_audio_fifo_free((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)))
 }

@@ -2,7 +2,7 @@ package avcodec
 
 //#include <libavutil/avutil.h>
 //#include <libavcodec/avcodec.h>
-//
+//#include <libavutil/audio_fifo.h>
 //#ifdef CODEC_CAP_HWACCEL
 //#define GO_CODEC_CAP_HWACCEL CODEC_CAP_HWACCEL
 //#else
@@ -2090,4 +2090,14 @@ func boolToCInt(b bool) C.int {
 		return 1
 	}
 	return 0
+}
+
+func AllocAudioFifo(codecContext *Context) *avutil.AudioFifo {
+	fifo := (uintptr)(unsafe.Pointer(C.av_audio_fifo_alloc((C.enum_AVSampleFormat)(codecContext.SampleRate()), (C.int)(codecContext.Channels()), 1)))
+	if fifo == 0 {
+		return nil
+	}
+	return &avutil.AudioFifo{
+		CAVAudioFifo: fifo,
+	}
 }
