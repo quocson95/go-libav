@@ -1432,13 +1432,18 @@ type AudioFifo struct {
 }
 
 func (fifo *AudioFifo) Realloc(size int) error {
-	if C.av_audio_fifo_realloc((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)), (C.int)(size)) < 0 {
+	if C.av_audio_fifo_realloc((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)),
+		C.av_audio_fifo_size((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)))+(C.int)(size)) < 0 {
 		return errors.New("Could not reallocate FIFO\n")
 	}
 	return nil
 }
 
 func (fifo *AudioFifo) Writer(frame *Frame) error {
+	if err := fifo.Realloc(frame.NumberOfSamples()); err != nil {
+		return err
+	}
+
 	if C.av_audio_fifo_write((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)),
 		C.go_get_void_pointer(frame.Frame().extended_data),
 		(C.int)(frame.NumberOfSamples())) < (C.int)(frame.NumberOfSamples()) {
