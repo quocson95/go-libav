@@ -982,6 +982,13 @@ func (f *Frame) PacketDuration() int64 {
 	return int64(C.av_frame_get_pkt_duration((*C.AVFrame)(unsafe.Pointer(f.CAVFrame))))
 }
 
+func (f *Frame) MakeWritable() error {
+	if C.av_frame_make_writable((*C.AVFrame)(unsafe.Pointer(f.CAVFrame))) < 0 {
+		return errors.New("")
+	}
+	return nil
+}
+
 type OptionAccessor struct {
 	obj  unsafe.Pointer
 	fake bool

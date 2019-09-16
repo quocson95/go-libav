@@ -1,10 +1,56 @@
 package avswresample
 
-// #include "libswresample/swresample.h"
-// #include "libavutil/avutil.h"
+// #include <libavutil/mathematics.h>
+// #include <libswresample/swresample.h>
+// #include <libavutil/avutil.h>
+// #include <libavutil/frame.h>
 // #define MAX_AUDIO_FRAME_SIZE 192000
-//static void go_av_swresample_free(SwrContext *swrCtx) {
-//	swr_free(&swrCtx);
+// struct AudioFrameInfo {
+// 	float t;
+// 	float tincr;
+// 	float tincr2;
+// } AudioFrameInfo;
+// static void go_av_swresample_free(SwrContext *swrCtx) {
+// 	swr_free(&swrCtx);
+// }
+// static double go_sin(double x){
+//	double sign=1;
+//	if (x<0){
+//		sign=-1.0;
+//		x=-x;
+//	}
+//	if (x > 360)
+//		x = x - (int)(x/360)*360;
+//	x*=M_PI/180.0;
+//	double res=0;
+//	double term=x;
+//	int k=1;
+//	while (res+term!=res){
+//		res+=term;
+//		k+=2;
+//		term*=-x*x/k/(k-1);
+//	}
+//
+//	return sign*res;
+//}
+//static struct AudioFrameInfo go_get_audio_frame(AVFrame *frame, int nb_channels, float t, float tincr, float tincr2)
+//{
+// int j, i, v;
+// struct AudioFrameInfo audioFrameInfo;
+// audioFrameInfo.t = t;
+// audioFrameInfo.tincr = tincr;
+// audioFrameInfo.tincr2 = tincr2;
+// int16_t *q;
+// q = (int16_t*)frame->data[0];
+// for (j = 0; j < frame->nb_samples; j++) {
+// 	v = (int)(go_sin(audioFrameInfo.t) * 10000);
+// 	for (i = 0; i < nb_channels; i++) {
+// 		*q++ = v;
+// 	}
+// 	audioFrameInfo.t     += audioFrameInfo.tincr;
+// 	audioFrameInfo.tincr += audioFrameInfo.tincr2;
+// }
+// return audioFrameInfo;
 //}
 // #cgo pkg-config: libswresample libavutil
 import "C"
@@ -56,4 +102,11 @@ func (swr *SwrContext) SwrConvert(frame *avutil.Frame, frameBuffer *avutil.Frame
 		return avutil.NewErrorFromCode((avutil.ErrorCode)(errCode))
 	}
 	return nil
+}
+
+func Get_Audio_Frame(frame *avutil.Frame, nb_channels int, t float64, tincr float64, tincr2 float64) (float64, float64, float64) {
+	var audioFrameInfo C.struct_AudioFrameInfo
+	audioFrameInfo = C.go_get_audio_frame((*C.AVFrame)(unsafe.Pointer(frame.CAVFrame)), (C.int)(nb_channels),
+		C.float(t), C.float(tincr), C.float(tincr2))
+	return float64(audioFrameInfo.t), float64(audioFrameInfo.tincr), float64(audioFrameInfo.tincr2)
 }
