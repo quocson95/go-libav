@@ -72,10 +72,10 @@ var (
 type Flags int
 
 const (
-	FlagNoFile       Flags = C.AVFMT_NOFILE
-	FlagNeedNumber   Flags = C.AVFMT_NEEDNUMBER
-	FlagShowIDs      Flags = C.AVFMT_SHOW_IDS
-	FlagRawPicture   Flags = C.AVFMT_RAWPICTURE
+	FlagNoFile     Flags = C.AVFMT_NOFILE
+	FlagNeedNumber Flags = C.AVFMT_NEEDNUMBER
+	FlagShowIDs    Flags = C.AVFMT_SHOW_IDS
+	//FlagRawPicture   Flags = C.AVFMT_RAWPICTURE
 	FlagGlobalHeader Flags = C.AVFMT_GLOBALHEADER
 	FlagNoTimestamps Flags = C.AVFMT_NOTIMESTAMPS
 	FlagGenericIndex Flags = C.AVFMT_GENERIC_INDEX
@@ -469,7 +469,7 @@ func NewStreamFromC(cStream uintptr) *Stream {
 	return &Stream{CAVStream: cStream}
 }
 
-func (s *Stream) Stream() (*C.AVStream) {
+func (s *Stream) Stream() *C.AVStream {
 	return (*C.AVStream)(unsafe.Pointer(s.CAVStream))
 }
 
@@ -924,7 +924,6 @@ type IOContext struct {
 func (ctx *IOContext) IOContext() *C.AVIOContext {
 	return (*C.AVIOContext)(unsafe.Pointer(ctx.CAVIOContext))
 }
-
 
 func OpenIOContext(url string, flags IOFlags, cb *IOInterruptCallback, options *avutil.Dictionary, pl unsafe.Pointer) (*IOContext, error) {
 	cURL := C.CString(url)
