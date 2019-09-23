@@ -92,6 +92,7 @@ func (swr *SwrContext) Init() error {
 
 func (swr *SwrContext) Free() {
 	C.go_av_swresample_free((*C.SwrContext)(unsafe.Pointer(swr.CAVSwrContext)))
+	swr.CAVSwrContext = 0
 }
 
 func (swr *SwrContext) SwrConvert(frame *avutil.Frame, frameBuffer *avutil.Frame) error {

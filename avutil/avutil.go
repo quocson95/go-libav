@@ -1474,4 +1474,5 @@ func (fifo *AudioFifo) Read(frame *Frame) error {
 
 func (fifo *AudioFifo) Free() {
 	C.av_audio_fifo_free((*C.AVAudioFifo)(unsafe.Pointer(fifo.CAVAudioFifo)))
+	fifo.CAVAudioFifo = 0
 }
