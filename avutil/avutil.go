@@ -61,6 +61,9 @@ package avutil
 //static void go_av_frame_free(AVFrame *frame) {
 //	av_frame_free(&frame);
 //}
+//static void go_av_frame_freedata(AVFrame *frame) {
+//	av_freep(&frame->data[0]);
+//}
 //static void** go_get_void_pointer(unsigned char **ptr) {
 //	return (void**)(ptr);
 //}
@@ -774,6 +777,12 @@ func (f *Frame) Free() {
 	if f.CAVFrame != 0 {
 		C.go_av_frame_free((*C.AVFrame)(unsafe.Pointer(f.CAVFrame)))
 		f.CAVFrame = 0
+	}
+}
+
+func (f *Frame) FreeData() {
+	if f.CAVFrame != 0 {
+		C.go_av_frame_freedata((*C.AVFrame)(unsafe.Pointer(f.CAVFrame)))
 	}
 }
 
