@@ -368,8 +368,20 @@ func NewPacket() (*Packet, error) {
 	return NewPacketFromC(uintptr(unsafe.Pointer(cPkt))), nil
 }
 
+func NewPacket2() (Packet, error) {
+	cPkt := uintptr(unsafe.Pointer(C.av_packet_alloc()))
+	if cPkt == 0 {
+		return Packet{CAVPacket: 0}, ErrAllocationError
+	}
+	return NewPacketFromC2(uintptr(unsafe.Pointer(cPkt))), nil
+}
+
 func NewPacketFromC(cPkt uintptr) *Packet {
 	return &Packet{CAVPacket: cPkt}
+}
+
+func NewPacketFromC2(cPkt uintptr) Packet {
+	return Packet{CAVPacket: cPkt}
 }
 
 func (pkt *Packet) Packet() *C.AVPacket {
