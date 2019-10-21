@@ -95,6 +95,10 @@ func (swr *SwrContext) Free() {
 	swr.CAVSwrContext = 0
 }
 
+func (swr *SwrContext) Close() {
+	C.swr_close((*C.SwrContext)(unsafe.Pointer(swr.CAVSwrContext)))
+}
+
 func (swr *SwrContext) SwrConvert(frame *avutil.Frame, frameBuffer *avutil.Frame) error {
 	errCode := C.swr_convert((*C.SwrContext)(unsafe.Pointer(swr.CAVSwrContext)), (**C.uchar)(frameBuffer.ExtendedData()),
 		(C.int)(frameBuffer.NumberOfSamples()),
