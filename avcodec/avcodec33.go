@@ -7,7 +7,7 @@ package avcodec
 //
 //
 //static void go_avcodec_parameters_free(void *pParam) {
-//	avcodec_parameters_free((AVCodecParameters**)(&pCtx));
+//	avcodec_parameters_free((AVCodecParameters**)(&pParam));
 //}
 // #cgo pkg-config: libavcodec libavutil
 import "C"
@@ -25,7 +25,7 @@ type CodecParameters struct {
 
 func NewCodecParameters() (*CodecParameters, error) {
 	cPkt := uintptr(unsafe.Pointer(C.avcodec_parameters_alloc()))
-	if cPkt == nil {
+	if cPkt == 0 {
 		return nil, ErrAllocationError
 	}
 	return NewCodecParametersFromC(cPkt), nil
