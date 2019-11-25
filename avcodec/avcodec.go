@@ -119,6 +119,10 @@ package avcodec
 //	av_packet_free((AVPacket**)&pPkt);
 //}
 //
+//static uintptr_t go_av_packet_alloc() {
+//	return (uintptr_t)av_packet_alloc();
+//}
+//
 // int GO_AVCODEC_VERSION_MAJOR = LIBAVCODEC_VERSION_MAJOR;
 // int GO_AVCODEC_VERSION_MINOR = LIBAVCODEC_VERSION_MINOR;
 // int GO_AVCODEC_VERSION_MICRO = LIBAVCODEC_VERSION_MICRO;
@@ -361,11 +365,11 @@ type Packet struct {
 }
 
 func NewPacket() (*Packet, error) {
-	cPkt := uintptr(unsafe.Pointer(C.av_packet_alloc()))
+	cPkt := C.go_av_packet_alloc()
 	if cPkt == 0 {
 		return nil, ErrAllocationError
 	}
-	return NewPacketFromC(uintptr(unsafe.Pointer(cPkt))), nil
+	return NewPacketFromC(uintptr(cPkt)), nil
 }
 
 func NewPacket2() (Packet, error) {
