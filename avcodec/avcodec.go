@@ -118,6 +118,13 @@ package avcodec
 //static void go_av_packet_free(void *pPkt) {
 //	av_packet_free((AVPacket**)&pPkt);
 //}
+//static void go_av_packet_free2(void *pPkt) {
+//	av_freep((AVPacket**)&pPkt);
+//}
+//
+//static uintptr_t go_av_packet_alloc() {
+//	return (uintptr_t)av_packet_alloc();
+//}
 //
 // int GO_AVCODEC_VERSION_MAJOR = LIBAVCODEC_VERSION_MAJOR;
 // int GO_AVCODEC_VERSION_MINOR = LIBAVCODEC_VERSION_MINOR;
@@ -190,23 +197,23 @@ const (
 type Capabilities int64
 
 const (
-	//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
-	//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
-	//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
-	//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
-	//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
-	//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
-	//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
-	//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
-	//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
-	//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
-	//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
-	//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
-	//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
-	//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
-	CapabilityVariableFrameSize Capabilities = C.AV_CODEC_CAP_VARIABLE_FRAME_SIZE
-	//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
-	//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
+//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
+//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
+//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
+//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
+//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
+//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
+//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
+//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
+//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
+//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
+//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
+//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
+//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
+//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
+//CapabilityVariableFrameSize Capabilities = C.CODEC_CAP_VARIABLE_FRAME_SIZE
+//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
+//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
 )
 
 type Compliance int
@@ -362,19 +369,35 @@ type Packet struct {
 }
 
 func NewPacket() (*Packet, error) {
-	cPkt := uintptr(unsafe.Pointer(C.av_packet_alloc()))
+	cPkt := C.go_av_packet_alloc()
 	if cPkt == 0 {
 		return nil, ErrAllocationError
 	}
-	return NewPacketFromC(uintptr(unsafe.Pointer(cPkt))), nil
+	return NewPacketFromC(uintptr(cPkt)), nil
+}
+
+func NewPacket2() (Packet, error) {
+	cPkt := uintptr(unsafe.Pointer(C.av_packet_alloc()))
+	if cPkt == 0 {
+		return Packet{CAVPacket: 0}, ErrAllocationError
+	}
+	return NewPacketFromC2(uintptr(unsafe.Pointer(cPkt))), nil
 }
 
 func NewPacketFromC(cPkt uintptr) *Packet {
 	return &Packet{CAVPacket: cPkt}
 }
 
+func NewPacketFromC2(cPkt uintptr) Packet {
+	return Packet{CAVPacket: cPkt}
+}
+
 func (pkt *Packet) Packet() *C.AVPacket {
 	return (*C.AVPacket)(unsafe.Pointer(pkt.CAVPacket))
+}
+
+func (pkt *Packet) FreePacket() {
+	C.go_av_packet_free2(unsafe.Pointer(pkt.CAVPacket))
 }
 
 func (pkt *Packet) Free() {
@@ -2090,14 +2113,4 @@ func boolToCInt(b bool) C.int {
 		return 1
 	}
 	return 0
-}
-
-func AllocAudioFifo(codecContext *Context) *avutil.AudioFifo {
-	fifo := (uintptr)(unsafe.Pointer(C.av_audio_fifo_alloc((C.enum_AVSampleFormat)(codecContext.SampleFormat()), (C.int)(codecContext.Channels()), 1)))
-	if fifo == 0 {
-		return nil
-	}
-	return &avutil.AudioFifo{
-		CAVAudioFifo: fifo,
-	}
 }

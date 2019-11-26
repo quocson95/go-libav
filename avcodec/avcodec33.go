@@ -5,6 +5,10 @@ package avcodec
 //#include <libavutil/avutil.h>
 //#include <libavcodec/avcodec.h>
 //
+//
+//static void go_avcodec_parameters_free(void *pParam) {
+//	avcodec_parameters_free((AVCodecParameters**)(&pParam));
+//}
 // #cgo pkg-config: libavcodec libavutil
 import "C"
 
@@ -15,23 +19,24 @@ import (
 )
 
 type CodecParameters struct {
-	CAVCodecParameters *C.AVCodecParameters
+	//CAVCodecParameters *C.AVCodecParameters
+	CAVCodecParameters uintptr
 }
 
 func NewCodecParameters() (*CodecParameters, error) {
-	cPkt := (*C.AVCodecParameters)(C.avcodec_parameters_alloc())
-	if cPkt == nil {
+	cPkt := uintptr(unsafe.Pointer(C.avcodec_parameters_alloc()))
+	if cPkt == 0 {
 		return nil, ErrAllocationError
 	}
-	return NewCodecParametersFromC(unsafe.Pointer(cPkt)), nil
+	return NewCodecParametersFromC(cPkt), nil
 }
 
-func NewCodecParametersFromC(cPSD unsafe.Pointer) *CodecParameters {
-	return &CodecParameters{CAVCodecParameters: (*C.AVCodecParameters)(cPSD)}
+func NewCodecParametersFromC(cPSD uintptr) *CodecParameters {
+	return &CodecParameters{CAVCodecParameters: cPSD}
 }
 
 func (cParams *CodecParameters) Free() {
-	C.avcodec_parameters_free(&cParams.CAVCodecParameters)
+	C.go_avcodec_parameters_free(unsafe.Pointer(cParams.CAVCodecParameters))
 }
 
 func (ctx *Context) CopyTo(dst *Context) error {
