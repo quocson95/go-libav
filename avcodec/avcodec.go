@@ -118,6 +118,9 @@ package avcodec
 //static void go_av_packet_free(void *pPkt) {
 //	av_packet_free((AVPacket**)&pPkt);
 //}
+//static void go_av_packet_free2(void *pPkt) {
+//	av_freep((AVPacket**)&pPkt);
+//}
 //
 //static uintptr_t go_av_packet_alloc() {
 //	return (uintptr_t)av_packet_alloc();
@@ -390,6 +393,10 @@ func NewPacketFromC2(cPkt uintptr) Packet {
 
 func (pkt *Packet) Packet() *C.AVPacket {
 	return (*C.AVPacket)(unsafe.Pointer(pkt.CAVPacket))
+}
+
+func (pkt *Packet) FreePacket() {
+	return C.go_av_packet_free2(unsafe.Pointer(pkt.CAVPacket))
 }
 
 func (pkt *Packet) Free() {
