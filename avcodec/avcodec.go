@@ -396,7 +396,7 @@ func (pkt *Packet) Packet() *C.AVPacket {
 }
 
 func (pkt *Packet) FreePacket() {
-	return C.go_av_packet_free2(unsafe.Pointer(pkt.CAVPacket))
+	C.go_av_packet_free2(unsafe.Pointer(pkt.CAVPacket))
 }
 
 func (pkt *Packet) Free() {
