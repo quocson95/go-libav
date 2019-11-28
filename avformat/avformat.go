@@ -463,6 +463,30 @@ func GuessOutputFromMimeType(mimeType string) *Output {
 	return NewOutputFromC(unsafe.Pointer(cOutput))
 }
 
+type CodecParameters struct {
+	CCodecParameters uintptr
+}
+
+func (cp *CodecParameters) CodecParameters() (*C.AVCodecParameters) {
+	return (*C.AVCodecParameters)(unsafe.Pointer(cp.CCodecParameters))
+}
+
+func NewCodecParametersFromC(cCodecParameters uintptr) *CodecParameters {
+	return &CodecParameters{CCodecParameters: cCodecParameters}
+}
+
+func (s *CodecParameters) Copy(d *CodecParameters) error {
+	code := C.avcodec_parameters_copy(d.CodecParameters(), s.CodecParameters())
+	if code < 0 {
+		return avutil.NewErrorFromCode(avutil.ErrorCode(code))
+	}
+	return nil
+}
+
+func (cp *CodecParameters) SetCodecTag(c int) {
+	cp.CodecParameters().codec_tag = C.uint(c)
+}
+
 type Stream struct {
 	//CAVStream *C.AVStream
 	CAVStream uintptr
@@ -489,6 +513,13 @@ func (s *Stream) CodecContext() *avcodec.Context {
 		return nil
 	}
 	return avcodec.NewContextFromC(uintptr(unsafe.Pointer(s.Stream().codec)))
+}
+
+func (s *Stream) CodecParameters() *CodecParameters {
+	if s.Stream().codecpar == nil {
+		return nil
+	}
+	return NewCodecParametersFromC(uintptr(unsafe.Pointer(s.Stream().codecpar)))
 }
 
 func (s *Stream) TimeBase() *avutil.Rational {
