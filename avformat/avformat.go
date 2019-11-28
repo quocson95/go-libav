@@ -187,6 +187,10 @@ func RegisterAll() {
 	C.av_register_all()
 }
 
+func RegisterNetwork() {
+	C.avformat_network_init()
+}
+
 type CodecTagList struct {
 	CAVCodecTag **C.struct_AVCodecTag
 }
