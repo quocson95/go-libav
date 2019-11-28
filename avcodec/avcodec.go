@@ -171,7 +171,7 @@ const (
 	//FlagTruncated     Flags = C.CODEC_FLAG_TRUNCATED
 	//FlagInterlacedDCT Flags = C.CODEC_FLAG_INTERLACED_DCT
 	//FlagLowDelay      Flags = C.CODEC_FLAG_LOW_DELAY
-	FlagGlobalHeader  Flags = C.AV_CODEC_FLAG_GLOBAL_HEADER
+	FlagGlobalHeader Flags = C.AV_CODEC_FLAG_GLOBAL_HEADER
 	//FlagBitExact      Flags = C.CODEC_FLAG_BITEXACT
 	//FlagACPred        Flags = C.CODEC_FLAG_AC_PRED
 	//FlagLoopFilter    Flags = C.CODEC_FLAG_LOOP_FILTER
@@ -182,37 +182,37 @@ const (
 type Flags2 int
 
 const (
-	//Flag2Fast              Flags2 = C.CODEC_FLAG2_FAST
-	//Flag2NoOutput          Flags2 = C.CODEC_FLAG2_NO_OUTPUT
-	//Flag2LocalHeader       Flags2 = C.CODEC_FLAG2_LOCAL_HEADER
-	//Flag2DropFrameTimecode Flags2 = C.CODEC_FLAG2_DROP_FRAME_TIMECODE
-	//Flag2IgnoreCrop        Flags2 = C.CODEC_FLAG2_IGNORE_CROP
-	//Flag2Chunks            Flags2 = C.CODEC_FLAG2_CHUNKS
-	//Flag2ShowAll           Flags2 = C.CODEC_FLAG2_SHOW_ALL
-	//Flag2ExportMvs         Flags2 = C.CODEC_FLAG2_EXPORT_MVS
-	//Flag2SkipManual        Flags2 = C.CODEC_FLAG2_SKIP_MANUAL
+//Flag2Fast              Flags2 = C.CODEC_FLAG2_FAST
+//Flag2NoOutput          Flags2 = C.CODEC_FLAG2_NO_OUTPUT
+//Flag2LocalHeader       Flags2 = C.CODEC_FLAG2_LOCAL_HEADER
+//Flag2DropFrameTimecode Flags2 = C.CODEC_FLAG2_DROP_FRAME_TIMECODE
+//Flag2IgnoreCrop        Flags2 = C.CODEC_FLAG2_IGNORE_CROP
+//Flag2Chunks            Flags2 = C.CODEC_FLAG2_CHUNKS
+//Flag2ShowAll           Flags2 = C.CODEC_FLAG2_SHOW_ALL
+//Flag2ExportMvs         Flags2 = C.CODEC_FLAG2_EXPORT_MVS
+//Flag2SkipManual        Flags2 = C.CODEC_FLAG2_SKIP_MANUAL
 )
 
 type Capabilities int64
 
 const (
-	//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
-	//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
-	//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
-	//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
-	//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
-	//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
-	//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
-	//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
-	//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
-	//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
-	//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
-	//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
-	//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
-	//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
-	//CapabilityVariableFrameSize Capabilities = C.CODEC_CAP_VARIABLE_FRAME_SIZE
-	//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
-	//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
+//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
+//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
+//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
+//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
+//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
+//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
+//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
+//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
+//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
+//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
+//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
+//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
+//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
+//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
+//CapabilityVariableFrameSize Capabilities = C.CODEC_CAP_VARIABLE_FRAME_SIZE
+//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
+//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
 )
 
 type Compliance int
@@ -325,7 +325,6 @@ func Version() (int, int, int) {
 	return int(C.GO_AVCODEC_VERSION_MAJOR), int(C.GO_AVCODEC_VERSION_MINOR), int(C.GO_AVCODEC_VERSION_MICRO)
 }
 
-
 func RegisterAll() {
 	C.avcodec_register_all()
 }
@@ -373,6 +372,10 @@ func NewPacket() (*Packet, error) {
 		return nil, ErrAllocationError
 	}
 	return NewPacketFromC(uintptr(cPkt)), nil
+}
+
+func (pkt *Packet) InitPacket() {
+	C.av_init_packet(pkt.Packet())
 }
 
 func NewPacket2() (Packet, error) {
@@ -445,12 +448,12 @@ func (pkt *Packet) RescaleTime2(srcTimeBase, dstTimeBase *avutil.Rational) {
 
 func (pkt *Packet) RescalePTS(pts int64, base *avutil.Rational) int64 {
 	src := (*C.AVRational)(unsafe.Pointer(&base.CAVRational))
-	return int64(C.av_rescale_q((C.int64_t)(pts), *src, C.AV_TIME_BASE_Q));
+	return int64(C.av_rescale_q((C.int64_t)(pts), *src, C.AV_TIME_BASE_Q))
 }
 
 func (pkt *Packet) RescalePTS2(pts int64, base *avutil.Rational) int64 {
 	src := (*C.AVRational)(unsafe.Pointer(&base.CAVRational))
-	return int64(C.av_rescale_q((C.int64_t)(pts), C.AV_TIME_BASE_Q, *src));
+	return int64(C.av_rescale_q((C.int64_t)(pts), C.AV_TIME_BASE_Q, *src))
 }
 
 func (pkt *Packet) PTS() int64 {
@@ -765,7 +768,7 @@ func NewContextFromC(cCtx uintptr) *Context {
 	}
 }
 
-func (ctx *Context) CodeContext() (*C.AVCodecContext) {
+func (ctx *Context) CodeContext() *C.AVCodecContext {
 	if ctx.CAVCodecContext != 0 {
 		return (*C.AVCodecContext)(unsafe.Pointer(ctx.CAVCodecContext))
 	}
