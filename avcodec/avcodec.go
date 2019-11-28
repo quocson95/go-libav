@@ -415,6 +415,10 @@ func (pkt *Packet) Unref() {
 	C.av_packet_unref(pkt.Packet())
 }
 
+func (pkt *Packet) Init() {
+	C.av_init_packet(pkt.Packet())
+}
+
 func (pkt *Packet) ConsumeData(size int) {
 	data := unsafe.Pointer(pkt.Packet().data)
 	if data != nil {
