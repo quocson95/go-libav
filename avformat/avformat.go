@@ -50,6 +50,9 @@ package avformat
 //static int go_avformat_open_input(AVFormatContext *ps, const char *filename, AVInputFormat *fmt, AVDictionary **options) {
 //	return avformat_open_input(&ps, filename, fmt, options);
 //}
+//static int go_avio_closep(void *pCtx) {
+//	return avio_closep((AVIOContext**)(&pCtx));
+//}
 //
 // #cgo pkg-config: libavformat libavutil
 import "C"
@@ -182,6 +185,10 @@ func Version() (int, int, int) {
 
 func RegisterAll() {
 	C.av_register_all()
+}
+
+func RegisterNetwork() {
+	C.avformat_network_init()
 }
 
 type CodecTagList struct {
@@ -460,6 +467,30 @@ func GuessOutputFromMimeType(mimeType string) *Output {
 	return NewOutputFromC(unsafe.Pointer(cOutput))
 }
 
+type CodecParameters struct {
+	CCodecParameters uintptr
+}
+
+func (cp *CodecParameters) CodecParameters() (*C.AVCodecParameters) {
+	return (*C.AVCodecParameters)(unsafe.Pointer(cp.CCodecParameters))
+}
+
+func NewCodecParametersFromC(cCodecParameters uintptr) *CodecParameters {
+	return &CodecParameters{CCodecParameters: cCodecParameters}
+}
+
+func (s *CodecParameters) Copy(d *CodecParameters) error {
+	code := C.avcodec_parameters_copy(d.CodecParameters(), s.CodecParameters())
+	if code < 0 {
+		return avutil.NewErrorFromCode(avutil.ErrorCode(code))
+	}
+	return nil
+}
+
+func (cp *CodecParameters) SetCodecTag(c int) {
+	cp.CodecParameters().codec_tag = C.uint(c)
+}
+
 type Stream struct {
 	//CAVStream *C.AVStream
 	CAVStream uintptr
@@ -486,6 +517,13 @@ func (s *Stream) CodecContext() *avcodec.Context {
 		return nil
 	}
 	return avcodec.NewContextFromC(uintptr(unsafe.Pointer(s.Stream().codec)))
+}
+
+func (s *Stream) CodecParameters() *CodecParameters {
+	if s.Stream().codecpar == nil {
+		return nil
+	}
+	return NewCodecParametersFromC(uintptr(unsafe.Pointer(s.Stream().codecpar)))
 }
 
 func (s *Stream) TimeBase() *avutil.Rational {
@@ -959,8 +997,7 @@ func (ctx *IOContext) Size() int64 {
 
 func (ctx *IOContext) Close() error {
 	if ctx.CAVIOContext != 0 {
-		cIOCtx := ctx.IOContext()
-		code := C.avio_closep(&cIOCtx)
+		code := C.go_avio_closep(unsafe.Pointer(ctx.CAVIOContext))
 		if code < 0 {
 			return avutil.NewErrorFromCode(avutil.ErrorCode(code))
 		}
