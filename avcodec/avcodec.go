@@ -197,21 +197,22 @@ const (
 type Capabilities int64
 
 const (
-//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
-//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
-//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
-//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
-//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
-//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
-//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
-//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
-//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
-//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
-//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
-//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
-//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
-//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
-//CapabilityVariableFrameSize Capabilities = C.CODEC_CAP_VARIABLE_FRAME_SIZE
+	//CapabilityDrawHorizBand     Capabilities = C.CODEC_CAP_DRAW_HORIZ_BAND
+	//CapabilityDR1               Capabilities = C.CODEC_CAP_DR1
+	//CapabilityTruncated         Capabilities = C.CODEC_CAP_TRUNCATED
+	//CapabilityHWAccel           Capabilities = C.GO_CODEC_CAP_HWACCEL
+	//CapabilityDelay             Capabilities = C.CODEC_CAP_DELAY
+	//CapabilitySmallLastFrame    Capabilities = C.CODEC_CAP_SMALL_LAST_FRAME
+	//CapabilityHWAccelVDPAU      Capabilities = C.GO_CODEC_CAP_HWACCEL_VDPAU
+	//CapabilitySubframes         Capabilities = C.CODEC_CAP_SUBFRAMES
+	//CapabilityExperimental      Capabilities = C.CODEC_CAP_EXPERIMENTAL
+	//CapabilityChannelConf       Capabilities = C.CODEC_CAP_CHANNEL_CONF
+	//CapabilityFrameThreads      Capabilities = C.CODEC_CAP_FRAME_THREADS
+	//CapabilitySliceThreads      Capabilities = C.CODEC_CAP_SLICE_THREADS
+	//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
+	//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
+	CapabilityVariableFrameSize Capabilities = C.AV_CODEC_CAP_VARIABLE_FRAME_SIZE
+
 //CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
 //CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
 )
@@ -2113,4 +2114,14 @@ func boolToCInt(b bool) C.int {
 		return 1
 	}
 	return 0
+}
+
+func AllocAudioFifo(codecContext *Context) *avutil.AudioFifo {
+	fifo := (uintptr)(unsafe.Pointer(C.av_audio_fifo_alloc((C.enum_AVSampleFormat)(codecContext.SampleFormat()), (C.int)(codecContext.Channels()), 1)))
+	if fifo == 0 {
+		return nil
+	}
+	return &avutil.AudioFifo{
+		CAVAudioFifo: fifo,
+	}
 }
