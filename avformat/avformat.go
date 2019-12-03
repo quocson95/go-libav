@@ -54,6 +54,11 @@ package avformat
 //	return avio_closep((AVIOContext**)(&pCtx));
 //}
 //
+//static void free_pointer(void *ptr) {
+//	av_freep(ptr);
+//}
+//
+//
 // #cgo pkg-config: libavformat libavutil
 import "C"
 
@@ -75,9 +80,9 @@ var (
 type Flags int
 
 const (
-	FlagNoFile       Flags = C.AVFMT_NOFILE
-	FlagNeedNumber   Flags = C.AVFMT_NEEDNUMBER
-	FlagShowIDs      Flags = C.AVFMT_SHOW_IDS
+	FlagNoFile     Flags = C.AVFMT_NOFILE
+	FlagNeedNumber Flags = C.AVFMT_NEEDNUMBER
+	FlagShowIDs    Flags = C.AVFMT_SHOW_IDS
 	//FlagRawPicture   Flags = C.AVFMT_RAWPICTURE
 	FlagGlobalHeader Flags = C.AVFMT_GLOBALHEADER
 	FlagNoTimestamps Flags = C.AVFMT_NOTIMESTAMPS
@@ -471,7 +476,7 @@ type CodecParameters struct {
 	CCodecParameters uintptr
 }
 
-func (cp *CodecParameters) CodecParameters() (*C.AVCodecParameters) {
+func (cp *CodecParameters) CodecParameters() *C.AVCodecParameters {
 	return (*C.AVCodecParameters)(unsafe.Pointer(cp.CCodecParameters))
 }
 
@@ -500,7 +505,7 @@ func NewStreamFromC(cStream uintptr) *Stream {
 	return &Stream{CAVStream: cStream}
 }
 
-func (s *Stream) Stream() (*C.AVStream) {
+func (s *Stream) Stream() *C.AVStream {
 	return (*C.AVStream)(unsafe.Pointer(s.CAVStream))
 }
 
@@ -612,6 +617,10 @@ func (s *Stream) FirstDTS() int64 {
 
 func (s *Stream) EndPTS() int64 {
 	return int64(C.av_stream_get_end_pts(s.Stream()))
+}
+
+func (s *Stream) Free() {
+	C.free_pointer(unsafe.Pointer(s.CAVStream))
 }
 
 type Context struct {
@@ -962,7 +971,6 @@ type IOContext struct {
 func (ctx *IOContext) IOContext() *C.AVIOContext {
 	return (*C.AVIOContext)(unsafe.Pointer(ctx.CAVIOContext))
 }
-
 
 func OpenIOContext(url string, flags IOFlags, cb *IOInterruptCallback, options *avutil.Dictionary, pl unsafe.Pointer) (*IOContext, error) {
 	cURL := C.CString(url)
