@@ -2121,3 +2121,13 @@ func boolToCInt(b bool) C.int {
 	}
 	return 0
 }
+
+func AllocAudioFifo(codecContext *Context) *avutil.AudioFifo {
+	fifo := (uintptr)(unsafe.Pointer(C.av_audio_fifo_alloc((C.enum_AVSampleFormat)(codecContext.SampleFormat()), (C.int)(codecContext.Channels()), 1)))
+	if fifo == 0 {
+		return nil
+	}
+	return &avutil.AudioFifo{
+		CAVAudioFifo: fifo,
+	}
+}
