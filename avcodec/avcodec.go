@@ -154,7 +154,6 @@ const (
 	CodecIDNone  CodecID = C.AV_CODEC_ID_NONE
 	CodecIDMJpeg CodecID = C.AV_CODEC_ID_MJPEG
 	CodecIDLJpeg CodecID = C.AV_CODEC_ID_LJPEG
-	CodecIDAAC   CodecID = C.AV_CODEC_ID_AAC
 )
 
 type Flags int64
@@ -212,9 +211,8 @@ const (
 	//CapabilityParamChange       Capabilities = C.CODEC_CAP_PARAM_CHANGE
 	//CapabilityAutoThreads       Capabilities = C.CODEC_CAP_AUTO_THREADS
 	CapabilityVariableFrameSize Capabilities = C.AV_CODEC_CAP_VARIABLE_FRAME_SIZE
-
-//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
-//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
+	//CapabilityIntraOnly         Capabilities = C.CODEC_CAP_INTRA_ONLY
+	//CapabilityLossless          Capabilities = C.CODEC_CAP_LOSSLESS
 )
 
 type Compliance int
@@ -377,6 +375,10 @@ func NewPacket() (*Packet, error) {
 	return NewPacketFromC(uintptr(cPkt)), nil
 }
 
+func (pkt *Packet) InitPacket() {
+	C.av_init_packet(pkt.Packet())
+}
+
 func NewPacket2() (Packet, error) {
 	cPkt := uintptr(unsafe.Pointer(C.av_packet_alloc()))
 	if cPkt == 0 {
@@ -415,6 +417,10 @@ func (pkt *Packet) Ref(dst *Packet) error {
 
 func (pkt *Packet) Unref() {
 	C.av_packet_unref(pkt.Packet())
+}
+
+func (pkt *Packet) Init() {
+	C.av_init_packet(pkt.Packet())
 }
 
 func (pkt *Packet) ConsumeData(size int) {
@@ -2114,14 +2120,4 @@ func boolToCInt(b bool) C.int {
 		return 1
 	}
 	return 0
-}
-
-func AllocAudioFifo(codecContext *Context) *avutil.AudioFifo {
-	fifo := (uintptr)(unsafe.Pointer(C.av_audio_fifo_alloc((C.enum_AVSampleFormat)(codecContext.SampleFormat()), (C.int)(codecContext.Channels()), 1)))
-	if fifo == 0 {
-		return nil
-	}
-	return &avutil.AudioFifo{
-		CAVAudioFifo: fifo,
-	}
 }

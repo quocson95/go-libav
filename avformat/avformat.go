@@ -54,6 +54,11 @@ package avformat
 //	return avio_closep((AVIOContext**)(&pCtx));
 //}
 //
+//static void free_pointer(void *ptr) {
+//	av_freep(ptr);
+//}
+//
+//
 // #cgo pkg-config: libavformat libavutil
 import "C"
 
@@ -471,7 +476,7 @@ type CodecParameters struct {
 	CCodecParameters uintptr
 }
 
-func (cp *CodecParameters) CodecParameters() (*C.AVCodecParameters) {
+func (cp *CodecParameters) CodecParameters() *C.AVCodecParameters {
 	return (*C.AVCodecParameters)(unsafe.Pointer(cp.CCodecParameters))
 }
 
