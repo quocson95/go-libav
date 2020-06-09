@@ -58,6 +58,11 @@ package avformat
 //	av_freep(ptr);
 //}
 //
+//static AVIOInterruptData* createInterruptData() {
+//	return (AVIOInterruptData*) av_malloc(sizeof(AVIOInterruptData*));
+//}
+//
+//
 //
 // #cgo pkg-config: libavformat libavutil
 import "C"
@@ -992,6 +997,26 @@ func OpenIOContext(url string, flags IOFlags, cb *IOInterruptCallback, options *
 	return NewIOContextFromC(cCtx), nil
 }
 
+func OpenIOContextWithInterruptData(url string, flags IOFlags, interruptData *IOInterruptData, options *avutil.Dictionary) (*IOContext, error) {
+	cURL := C.CString(url)
+	defer C.free(unsafe.Pointer(cURL))
+	var cOptions **C.AVDictionary
+	if options != nil {
+		cOptions = (**C.AVDictionary)(options.Pointer())
+	}
+	var cAVIOInterruptData *C.AVIOInterruptData
+	if interruptData != nil {
+		cAVIOInterruptData = (*C.AVIOInterruptData)(unsafe.Pointer(interruptData.CAVIOInterruptData))
+	}
+
+	var cCtx uintptr
+	code := C.avio_open2_with_interruptdata((**C.AVIOContext)(unsafe.Pointer(&cCtx)), cURL, (C.int)(flags), cAVIOInterruptData, cOptions)
+	if code < 0 {
+		return nil, avutil.NewErrorFromCode(avutil.ErrorCode(code))
+	}
+	return NewIOContextFromC(cCtx), nil
+}
+
 func NewIOContextFromC(cCtx uintptr) *IOContext {
 	return &IOContext{CAVIOContext: cCtx}
 }
@@ -1012,6 +1037,37 @@ func (ctx *IOContext) Close() error {
 
 type IOInterruptCallback struct {
 	CAVIOInterruptCB *C.AVIOInterruptCB
+}
+
+type IOInterruptData struct {
+	CAVIOInterruptData uintptr
+}
+
+func (interruptData *IOInterruptData) SetStreamName(streamName string) {
+	cStreamName := C.CString(streamName)
+	cAVIOInterruptData := (*C.AVIOInterruptData)(unsafe.Pointer(interruptData.CAVIOInterruptData))
+	cAVIOInterruptData.streamName = cStreamName
+}
+
+func (interruptData *IOInterruptData) SetLastTimestamp(lastTimestamp int) {
+	cAVIOInterruptData := (*C.AVIOInterruptData)(unsafe.Pointer(interruptData.CAVIOInterruptData))
+	if cAVIOInterruptData != nil {
+		cAVIOInterruptData.lastTimestamp = C.uint(lastTimestamp)
+	}
+}
+
+func (interruptData *IOInterruptData) Free() {
+	cAVIOInterruptData := unsafe.Pointer(interruptData.CAVIOInterruptData)
+	C.free(unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName))
+	C.av_free(cAVIOInterruptData)
+}
+
+func NewIOInterruptDataFromC() *IOInterruptData {
+	interruptData := C.createInterruptData()
+	if interruptData != nil {
+		return &IOInterruptData{CAVIOInterruptData: uintptr(unsafe.Pointer(interruptData))}
+	}
+	return nil
 }
 
 func NewIOInterruptCallbackFromC(cb unsafe.Pointer) *IOInterruptCallback {
