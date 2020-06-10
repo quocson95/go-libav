@@ -59,7 +59,9 @@ package avformat
 //}
 //
 //static AVIOInterruptData* createInterruptData() {
-//	return (AVIOInterruptData*) av_malloc(sizeof(AVIOInterruptData*));
+//	AVIOInterruptData* interruptData = (AVIOInterruptData*) av_malloc(sizeof(AVIOInterruptData*));
+//  interruptData->streamName = NULL;
+//  return interruptData;
 //}
 //
 //
@@ -1046,6 +1048,9 @@ type IOInterruptData struct {
 func (interruptData *IOInterruptData) SetStreamName(streamName string) {
 	cStreamName := C.CString(streamName)
 	cAVIOInterruptData := (*C.AVIOInterruptData)(unsafe.Pointer(interruptData.CAVIOInterruptData))
+	if unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName) != nil {
+		C.free(unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName))
+	}
 	cAVIOInterruptData.streamName = cStreamName
 }
 
@@ -1058,7 +1063,9 @@ func (interruptData *IOInterruptData) SetLastTimestamp(lastTimestamp int) {
 
 func (interruptData *IOInterruptData) Free() {
 	cAVIOInterruptData := unsafe.Pointer(interruptData.CAVIOInterruptData)
-	C.free(unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName))
+	if unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName) != nil {
+		C.free(unsafe.Pointer((*C.AVIOInterruptData)(cAVIOInterruptData).streamName))
+	}
 	C.av_free(cAVIOInterruptData)
 }
 
