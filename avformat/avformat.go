@@ -55,7 +55,7 @@ package avformat
 //}
 //
 //static void free_pointer(void *ptr) {
-//	av_freep(ptr);
+//	av_freep(&ptr);
 //}
 //
 //static AVIOInterruptData* createInterruptData() {
@@ -1060,7 +1060,7 @@ func (interruptData *IOInterruptData) SetLastTimestamp(lastTimestamp int) {
 
 func (interruptData *IOInterruptData) Free() {
 	cAVIOInterruptData := unsafe.Pointer(interruptData.CAVIOInterruptData)
-	C.av_free(cAVIOInterruptData)
+	C.free_pointer(cAVIOInterruptData)
 }
 
 func NewIOInterruptDataFromC() *IOInterruptData {
