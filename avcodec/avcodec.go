@@ -151,10 +151,12 @@ var (
 type CodecID C.enum_AVCodecID
 
 const (
-	CodecIDNone  CodecID = C.AV_CODEC_ID_NONE
-	CodecIDMJpeg CodecID = C.AV_CODEC_ID_MJPEG
-	CodecIDLJpeg CodecID = C.AV_CODEC_ID_LJPEG
-	CodecIDAAC   CodecID = C.AV_CODEC_ID_AAC
+	CodecIDNone     CodecID = C.AV_CODEC_ID_NONE
+	CodecIDMJpeg    CodecID = C.AV_CODEC_ID_MJPEG
+	CodecIDLJpeg    CodecID = C.AV_CODEC_ID_LJPEG
+	CodecIDAAC      CodecID = C.AV_CODEC_ID_AAC
+	CodecIDPCMALAW  CodecID = C.AV_CODEC_ID_PCM_ALAW
+	CodecIDPCMMULAW CodecID = C.AV_CODEC_ID_PCM_MULAW
 )
 
 type Flags int64
