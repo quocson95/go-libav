@@ -62,7 +62,12 @@ package avformat
 //	return (AVIOInterruptData*) av_malloc(sizeof(AVIOInterruptData*));
 //}
 //
-//
+//static char* avSdpCreate(AVFormatContext *ps) {
+//  char *buf = malloc(16384);
+// 	AVFormatContext *ac[] = { ps };
+//	av_sdp_create(ac, 1, buf, 16384);
+//  return buf;
+//}
 //
 // #cgo pkg-config: libavformat libavutil
 import "C"
@@ -659,6 +664,20 @@ func NewContextForOutput2(fmt string) (*Context, error) {
 	return NewContextFromC(cCtx), nil
 }
 
+func NewContextForOutput3(fmt string, filename string) (*Context, error) {
+	cFmt := C.CString(fmt)
+	defer C.free(unsafe.Pointer(cFmt))
+	cFilename := C.CString(filename)
+	defer C.free(unsafe.Pointer(cFilename))
+	//var cCtx *C.AVFormatContext
+	var cCtx uintptr
+	code := C.go_avformat_alloc_output_context2((**C.AVFormatContext)(unsafe.Pointer(&cCtx)), nil, cFmt, cFilename)
+	if code < 0 {
+		return nil, avutil.NewErrorFromCode(avutil.ErrorCode(code))
+	}
+	return NewContextFromC(cCtx), nil
+}
+
 func NewContextFromC(cCtx uintptr) *Context {
 	return &Context{CAVFormatContext: cCtx}
 }
@@ -838,6 +857,13 @@ func (ctx *Context) MaxDelay() int {
 
 func (ctx *Context) SetMaxDelay(maxDelay int) {
 	ctx.FormatContext().max_delay = (C.int)(maxDelay)
+}
+
+func (ctx *Context) GetSDP() string {
+	sdp := C.avSdpCreate(ctx.FormatContext())
+	sdpStr, _ := cStringToStringOk(sdp)
+	C.free(unsafe.Pointer(sdp))
+	return sdpStr
 }
 
 func (ctx *Context) Flags() ContextFlags {
