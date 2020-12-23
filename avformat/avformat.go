@@ -50,6 +50,9 @@ package avformat
 //static int go_avformat_open_input(AVFormatContext *ps, const char *filename, AVInputFormat *fmt, AVDictionary **options) {
 //	return avformat_open_input(&ps, filename, fmt, options);
 //}
+//static int go_avformat_open_input_with_interrupt(AVFormatContext *ps, const char *filename, AVInputFormat *fmt, const AVIOInterruptData *interruptData, AVDictionary **options) {
+//	return avformat_open_input_with_interrupt(&ps, filename, fmt, interruptData, options);
+//}
 //static int go_avio_closep(void *pCtx) {
 //	return avio_closep((AVIOContext**)(&pCtx));
 //}
@@ -936,6 +939,30 @@ func (ctx *Context) OpenInput(fileName string, input *Input, options *avutil.Dic
 		cOptions = (**C.AVDictionary)(options.Pointer())
 	}
 	code := C.go_avformat_open_input(ctx.FormatContext(), cFileName, cInput, cOptions)
+	if code < 0 {
+		return avutil.NewErrorFromCode(avutil.ErrorCode(code))
+	}
+	return nil
+}
+
+func (ctx *Context) OpenInputWithInterruptData(fileName string, input *Input, interruptData *IOInterruptData, options *avutil.Dictionary) error {
+	cFileName := C.CString(fileName)
+	defer C.free(unsafe.Pointer(cFileName))
+	var cInput *C.AVInputFormat
+	if input != nil {
+		cInput = input.CAVInputFormat
+	}
+	var cOptions **C.AVDictionary
+	if options != nil {
+		cOptions = (**C.AVDictionary)(options.Pointer())
+	}
+
+	var cAVIOInterruptData *C.AVIOInterruptData
+	if interruptData != nil {
+		cAVIOInterruptData = (*C.AVIOInterruptData)(unsafe.Pointer(interruptData.CAVIOInterruptData))
+	}
+
+	code := C.go_avformat_open_input_with_interrupt(ctx.FormatContext(), cFileName, cInput, cAVIOInterruptData, cOptions)
 	if code < 0 {
 		return avutil.NewErrorFromCode(avutil.ErrorCode(code))
 	}
