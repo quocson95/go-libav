@@ -73,6 +73,12 @@ package avformat
 //	av_sdp_create(ac, 1, buf, 16384);
 //  return buf;
 //}
+//static char* avSdpCreateFrom2Context(AVFormatContext *ps1, AVFormatContext *ps2) {
+//  char *buf = malloc(16384);
+// 	AVFormatContext *acs[] = { ps1, ps2 };
+//	av_sdp_create(acs, 2, buf, 16384);
+//  return buf;
+//}
 //
 // #cgo pkg-config: libavformat libavutil
 import "C"
@@ -866,6 +872,13 @@ func (ctx *Context) SetMaxDelay(maxDelay int) {
 
 func (ctx *Context) GetSDP() string {
 	sdp := C.avSdpCreate(ctx.FormatContext())
+	sdpStr, _ := cStringToStringOk(sdp)
+	C.free(unsafe.Pointer(sdp))
+	return sdpStr
+}
+
+func GetSDPFromContext(ctx1 *Context, ctx2 *Context) string {
+	sdp := C.avSdpCreateFrom2Context(ctx1.FormatContext(), ctx2.FormatContext())
 	sdpStr, _ := cStringToStringOk(sdp)
 	C.free(unsafe.Pointer(sdp))
 	return sdpStr
