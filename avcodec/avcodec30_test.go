@@ -1,3 +1,4 @@
+//go:build ffmpeg30
 // +build ffmpeg30
 
 package avcodec
@@ -6,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/baohavan/go-libav/avutil"
+	"github.com/quocson95/go-libav/avutil"
 )
 
 func TestNewBitStreamFilterContextFromName(t *testing.T) {

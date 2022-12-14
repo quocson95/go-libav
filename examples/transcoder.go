@@ -4,7 +4,7 @@
 // cases. This sample is far from perfect, and it will easily break/crash
 // depending on the specified input and output files.
 //
-// Tested with
+// # Tested with
 //
 // go run transcoder.go --input=https://bintray.com/baohavan/go-libav/download_file?file_path=sample_iPod.m4v --output=output.mp4
 // go run transcoder.go --input=https://bintray.com/baohavan/go-libav/download_file?file_path=sample_iPod.m4v --output=output.avi
@@ -14,10 +14,10 @@ import (
 	"flag"
 	"log"
 
-	"github.com/baohavan/go-libav/avcodec"
-	"github.com/baohavan/go-libav/avfilter"
-	"github.com/baohavan/go-libav/avformat"
-	"github.com/baohavan/go-libav/avutil"
+	"github.com/quocson95/go-libav/avcodec"
+	"github.com/quocson95/go-libav/avfilter"
+	"github.com/quocson95/go-libav/avformat"
+	"github.com/quocson95/go-libav/avutil"
 )
 
 var inputFileName, outputFileName string

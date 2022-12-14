@@ -1,3 +1,4 @@
+//go:build ffmpeg33
 // +build ffmpeg33
 
 package avcodec
@@ -15,7 +16,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/baohavan/go-libav/avutil"
+	"github.com/quocson95/go-libav/avutil"
 )
 
 type CodecParameters struct {

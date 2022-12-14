@@ -1,3 +1,4 @@
+//go:build ffmpeg30
 // +build ffmpeg30
 
 package avformat
@@ -13,8 +14,8 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/baohavan/go-libav/avcodec"
-	"github.com/baohavan/go-libav/avutil"
+	"github.com/quocson95/go-libav/avcodec"
+	"github.com/quocson95/go-libav/avutil"
 )
 
 func ApplyBitstreamFilters(codecCtx *avcodec.Context, pkt *avcodec.Packet, filtersCtx *avcodec.BitStreamFilterContext) error {

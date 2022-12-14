@@ -89,8 +89,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/baohavan/go-libav/avcodec"
-	"github.com/baohavan/go-libav/avutil"
+	"github.com/quocson95/go-libav/avcodec"
+	"github.com/quocson95/go-libav/avutil"
 )
 
 var (
