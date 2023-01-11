@@ -1095,7 +1095,8 @@ func (ctx *IOContext) Size() int64 {
 
 func (ctx *IOContext) Close() error {
 	if ctx.CAVIOContext != 0 {
-		code := C.go_avio_closep(unsafe.Pointer(ctx.CAVIOContext))
+// 		code := C.go_avio_closep(unsafe.Pointer(ctx.CAVIOContext))
+		code := C.avio_context_free(**C.AVIOContext)(unsafe.Pointer(&ctx.CAVIOContext))
 		if code < 0 {
 			return avutil.NewErrorFromCode(avutil.ErrorCode(code))
 		}
