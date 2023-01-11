@@ -60,6 +60,9 @@ package avformat
 //static void free_pointer(void *ptr) {
 //	av_freep(&ptr);
 //}
+//static go_avio_context_free(void *pCtx) {
+//	avio_context_free((AVIOContext**)(&pCtx));
+//}
 //
 //static AVIOInterruptData* createInterruptData() {
 //	AVIOInterruptData* interruptData = (AVIOInterruptData*) av_malloc(sizeof(AVIOInterruptData*));
@@ -1095,10 +1098,8 @@ func (ctx *IOContext) Size() int64 {
 
 func (ctx *IOContext) Close() error {
 	if ctx.CAVIOContext != 0 {
-		code := C.go_avio_closep(unsafe.Pointer(ctx.CAVIOContext))
-		if code < 0 {
-			return avutil.NewErrorFromCode(avutil.ErrorCode(code))
-		}
+		// 		code := C.go_avio_closep(unsafe.Pointer(ctx.CAVIOContext))
+		C.go_avio_context_free(unsafe.Pointer(ctx.CAVIOContext))
 	}
 	return nil
 }
